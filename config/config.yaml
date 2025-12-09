@@ -2,10 +2,13 @@
 
 # OpenAI API 配置
 openai:
-  api_key: "your-openai-api-key-here"
+  api_key: "your-openai-api-key"
   model: "gpt-4o"
   temperature: 0.7
   max_tokens: 2000
+
+google:
+  api_key: "your-google-key"
 
 # 大厂判断标准配置
 big_company:
