@@ -1,0 +1,56 @@
+# ResumeSearch 配置文件
+
+# OpenAI API 配置
+openai:
+  api_key: "your-openai-api-key-here"
+  model: "gpt-4o"
+  temperature: 0.7
+  max_tokens: 2000
+
+# 大厂判断标准配置
+big_company:
+  # 员工人数阈值
+  employee_count_threshold: 1000
+  # 是否要求上市企业
+  require_listed: true
+  # 知名大厂列表（可自定义）
+  known_companies:
+    - "腾讯"
+    - "阿里巴巴"
+    - "字节跳动"
+    - "百度"
+    - "京东"
+    - "美团"
+    - "拼多多"
+    - "网易"
+    - "小米"
+    - "华为"
+    - "Google"
+    - "Microsoft"
+    - "Amazon"
+    - "Meta"
+    - "Apple"
+    - "Netflix"
+
+# 负面舆情检索配置
+negative_check:
+  # 是否启用深度搜索
+  enable_deep_search: true
+  # 搜索关键词
+  search_keywords:
+    - "负面"
+    - "纠纷"
+    - "诉讼"
+    - "违规"
+    - "处罚"
+
+# API 配置
+api:
+  host: "0.0.0.0"
+  port: 8000
+  debug: true
+
+# 并发配置
+concurrent:
+  max_workers: 3
+  timeout: 60
