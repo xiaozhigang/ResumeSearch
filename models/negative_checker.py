@@ -2,7 +2,13 @@
 负面舆情检索模块（模型4）
 功能：检索候选人是否有负面舆情信息
 """
+import json
+import os
 from typing import Dict, Any
+
+import requests
+from serpapi import GoogleSearch
+
 from .base_model import BaseModel
 from utils.config_loader import config
 
@@ -13,6 +19,7 @@ class NegativeChecker(BaseModel):
     def __init__(self):
         super().__init__()
         self.negative_config = config.get_negative_check_config()
+        self.google_config = config.get_google_config()
         self.search_keywords = self.negative_config.get('search_keywords', [])
 
         self.system_prompt = f"""你是一个专业的背景调查专家。
@@ -45,6 +52,30 @@ class NegativeChecker(BaseModel):
 }}
 """
 
+    def web_search(self, query):
+
+        # client = serpapi.Client(api_key="c74d00d0bc23536544bd49f64e4a1e37acb76095bbafbc998872d509a6582c36")
+        # result = client.search({
+        #     "engine": "google",
+        #     "q": query
+        # })
+        # print(json.dumps(result, indent=2, ensure_ascii=False))
+        # return result
+
+        search = GoogleSearch({
+            "q": query,
+            "location": "Austin,Texas",
+            "api_key": self.google_config.get('api_key')
+        })
+        return search.get_dict()
+
+
+        # url = "https://serpapi.com/search"
+        # headers = {"Ocp-Apim-Subscription-Key": "c74d00d0bc23536544bd49f64e4a1e37acb76095bbafbc998872d509a6582c36"}
+        # params = {"q": query, "mkt": "zh-CN"}
+        # return requests.get(url, headers=headers, params=params).json()
+
+
     def process(self, personal_info: Dict[str, Any], work_experience: list) -> Dict[str, Any]:
         """
         检索负面舆情
@@ -56,22 +87,24 @@ class NegativeChecker(BaseModel):
         Returns:
             检索结果
         """
+        name = personal_info.get('name', '未知')
+        companies = [exp.get('company', '') for exp in work_experience]
         print("=" * 50)
         print("【模型4】开始检索负面舆情...")
+        query = f"员工 {name}, {', '.join(companies)}"
+        search_results = self.web_search(query)
+
         print("=" * 50)
 
         try:
-            name = personal_info.get('name', '未知')
-            companies = [exp.get('company', '') for exp in work_experience]
+
 
             user_prompt = f"""候选人信息：
 姓名: {name}
 工作过的公司: {', '.join(companies)}
 
-请模拟深度搜索（Deep Research），分析该候选人是否可能存在负面舆情信息。
-搜索关键词: {', '.join(self.search_keywords)}
-
-注意：这是模拟分析，实际应用需要接入真实搜索引擎。"""
+根据下面的搜索结果总结合分析员工有没有劣质舆论。
+{search_results}"""
 
             response = self.call_gpt(
                 system_prompt=self.system_prompt,
